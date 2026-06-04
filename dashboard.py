@@ -216,7 +216,8 @@ def load_geojson() -> dict:
 
 def cb(**kw):
     base = dict(paper_bgcolor=PAGE_BG, plot_bgcolor=PAGE_BG,
-                font=dict(family="system-ui,-apple-system,sans-serif", color=TXT, size=10),
+                font=dict(family="system-ui,-apple-system,sans-serif", color=TXT,
+                          size=10, weight="bold"),
                 margin=dict(t=16,b=36,l=4,r=4), showlegend=True)
     base.update(kw); return base
 
@@ -298,7 +299,7 @@ def sido_choropleth(agg: pd.DataFrame, metric_col: str, label: str, fmt: str,
     fig.add_trace(go.Scattermap(
         lat=lab_lat, lon=lab_lon, mode="text", text=lab_txt,
         textfont=dict(size=11, color="#111827",
-                      family="system-ui,-apple-system,sans-serif"),
+                      family="system-ui,-apple-system,sans-serif", weight="bold"),
         hoverinfo="skip", showlegend=False, name="라벨",
     ))
 
@@ -320,10 +321,12 @@ def sido_choropleth(agg: pd.DataFrame, metric_col: str, label: str, fmt: str,
         paper_bgcolor=PAGE_BG,
         # 한국 영역으로 지도 고정 (한반도 bounding box 밖으로 못 벗어남)
         map=dict(bounds=dict(west=118.0, east=137.0, south=28.0, north=43.0)),
-        coloraxis_colorbar=dict(title=dict(text=label, font=dict(size=10)),
+        coloraxis_colorbar=dict(title=dict(text=label, font=dict(size=10, weight="bold")),
                                 len=0.72, thickness=10,
-                                tickfont=dict(size=9, family="JetBrains Mono, monospace")),
-        font=dict(family="system-ui,-apple-system,sans-serif", color=TXT, size=11),
+                                tickfont=dict(size=9, family="JetBrains Mono, monospace",
+                                              weight="bold")),
+        font=dict(family="system-ui,-apple-system,sans-serif", color=TXT, size=11,
+                  weight="bold"),
         uirevision=f"z{zoom:.1f}",   # 줌 변경 시 뷰 재적용(슬라이더 반영)
         transition=dict(duration=350, easing="cubic-in-out"),
     )
@@ -381,17 +384,18 @@ def race_figure(cats, vals, scale, fmt="{:,.0f}", unit="", n_steps=20, height=42
     fig = go.Figure(data=frames[-1].data, frames=frames)     # 초기=완성 상태
     fig.update_layout(
         paper_bgcolor=PAGE_BG, plot_bgcolor=PAGE_BG, height=height,
-        font=dict(family="system-ui,-apple-system,sans-serif", color=TXT, size=10),
+        font=dict(family="system-ui,-apple-system,sans-serif", color=TXT, size=10,
+                  weight="bold"),
         margin=dict(t=30, b=20, l=72, r=70),
         xaxis=dict(range=[0, vmax * 1.20], visible=False, fixedrange=True),
         yaxis=dict(autorange="reversed", fixedrange=True,
-                   tickfont=dict(size=12, color="#111827"), ticklabelposition="outside",
-                   automargin=True),
+                   tickfont=dict(size=12, color="#111827", weight="bold"),
+                   ticklabelposition="outside", automargin=True),
         showlegend=False,
         sliders=[dict(
             active=0, x=0.1, len=0.88, y=1.06, yanchor="bottom",
             pad=dict(t=0, b=0), currentvalue=dict(visible=False),
-            tickcolor="#E5E7EB", font=dict(size=8),
+            tickcolor="#E5E7EB", font=dict(size=8, weight="bold"),
             steps=[dict(method="animate", label="",
                         args=[[str(i)], dict(mode="immediate",
                               frame=dict(duration=0, redraw=True),
@@ -795,7 +799,7 @@ def render_tab(cfg: dict):
         th, ts = st.columns([2.3, 1])
         with th:
             st.markdown(f"<p class='ct' style='margin-top:6px;'>"
-                        f"시도별 {metric_label} — 단계구분도 (클릭 시 선택·해석)</p>",
+                        f"시도별 {metric_label} — 단계구분도</p>",
                         unsafe_allow_html=True)
         with ts:
             map_zoom = st.slider("🔍 지도 크기", 3.0, 7.0,
@@ -840,19 +844,20 @@ def render_tab(cfg: dict):
     cdn, r1 = st.columns([1.2, 2])
 
     with cdn:
-        st.markdown("<p class='ct'>설립유형별 재원 구성 (클릭 해석)</p>",
+        st.markdown("<p class='ct'>설립유형별 재원 구성</p>",
                     unsafe_allow_html=True)
         _dn_colors = [colors.get(t,"#ccc") for t in gtype.index]
         _pull = [0.12 if (xf_type and t == xf_type) else 0 for t in gtype.index]
         fig_dn = go.Figure(go.Pie(
             labels=gtype.index, values=gtype.values, hole=0.55, sort=False,
-            pull=_pull, marker_colors=_dn_colors, textinfo="percent", textfont_size=10,
+            pull=_pull, marker_colors=_dn_colors, textinfo="percent",
+            textfont=dict(size=10, weight="bold"),
             hovertemplate="<b>%{label}</b><br>%{value:,}명 (%{percent})<extra></extra>"))
         fig_dn.update_layout(
             annotations=[dict(text=f"<b>{int(gtype.sum()):,}</b><br>명",
                               x=0.5,y=0.5,font=dict(size=13,family="JetBrains Mono,monospace"),
                               showarrow=False)],
-            legend=dict(orientation="h",y=-0.12,x=0.5,xanchor="center",font=dict(size=8)),
+            legend=dict(orientation="h",y=-0.12,x=0.5,xanchor="center",font=dict(size=8, weight="bold")),
             **cb(height=320,margin=dict(t=10,b=40,l=4,r=4)),
         )
         ev_dn = st.plotly_chart(fig_dn, use_container_width=True,
@@ -865,7 +870,7 @@ def render_tab(cfg: dict):
             st.rerun()
 
     with r1:
-        st.markdown(f"<p class='ct'>시도별 설립유형별 재원{unit_child} 수 (클릭 → 시도 연동)</p>",
+        st.markdown(f"<p class='ct'>시도별 설립유형별 재원{unit_child} 수</p>",
                     unsafe_allow_html=True)
         piv = df_full.groupby(["sido_name","facility_type"])["child_count"].sum().reset_index()
         so_order = (piv.groupby("sido_name")["child_count"].sum()
@@ -879,10 +884,10 @@ def render_tab(cfg: dict):
                 hovertemplate=f"{ft}: %{{y:,}}명<extra></extra>"))
         fig_st.update_layout(
             barmode="stack", bargap=0.42, hovermode="x unified",
-            xaxis=dict(showgrid=False,zeroline=False,tickangle=-25,tickfont=dict(size=8),
+            xaxis=dict(showgrid=False,zeroline=False,tickangle=-25,tickfont=dict(size=8, weight="bold"),
                        showspikes=True,spikethickness=1,spikecolor="#9CA3AF",spikedash="dot"),
             yaxis=dict(showgrid=False,zeroline=False,tickformat=","),
-            legend=dict(orientation="h",y=1.04,x=0.5,xanchor="center",font=dict(size=8)),
+            legend=dict(orientation="h",y=1.04,x=0.5,xanchor="center",font=dict(size=8, weight="bold")),
             **cb(height=300,margin=dict(t=10,b=30,l=4,r=4)),
         )
         ev_st = st.plotly_chart(fig_st, use_container_width=True,
@@ -911,21 +916,21 @@ def render_tab(cfg: dict):
             fig_ax = go.Figure(go.Bar(x=ps.values, y=list(ps.index), orientation="h",
                 marker=dict(color=list(ps.values), colorscale=scale, showscale=False),
                 text=[f"{int(v):,}" for v in ps.values],
-                textposition="outside", textfont=dict(size=8),
+                textposition="outside", textfont=dict(size=8, weight="bold"),
                 hovertemplate="%{y}: %{x:,}명<extra></extra>"))
         else:  # cps — 시도별 교사 1인당
-            st.markdown("<p class='ct'>시도별 교사 1인당 아동 수 (클릭 → 시도 연동)</p>",
+            st.markdown("<p class='ct'>시도별 교사 1인당 아동 수</p>",
                         unsafe_allow_html=True)
             cpsd = agg.sort_values("cps")
             aux_sido_cats = list(cpsd["sido_name"])
             fig_ax = go.Figure(go.Bar(x=cpsd["cps"], y=cpsd["sido_name"], orientation="h",
                 marker=dict(color=list(cpsd["cps"]), colorscale=scale, showscale=False),
                 text=[f"{v:.2f}" for v in cpsd["cps"]],
-                textposition="outside", textfont=dict(size=8),
+                textposition="outside", textfont=dict(size=8, weight="bold"),
                 hovertemplate="%{y}: %{x:.2f}명<extra></extra>"))
         fig_ax.update_layout(
             xaxis=dict(showgrid=False,zeroline=False,visible=False),
-            yaxis=dict(showgrid=False,zeroline=False,tickfont=dict(size=8)),
+            yaxis=dict(showgrid=False,zeroline=False,tickfont=dict(size=8, weight="bold")),
             **cb(showlegend=False,height=300,margin=dict(t=6,b=10,l=4,r=55)),
         )
         ev_ax = st.plotly_chart(fig_ax, use_container_width=True,
@@ -938,18 +943,18 @@ def render_tab(cfg: dict):
             st.rerun()
 
     with r3:
-        st.markdown("<p class='ct'>시도별 정원 충족률 (%) (클릭 → 시도 연동)</p>",
+        st.markdown("<p class='ct'>시도별 정원 충족률 (%)</p>",
                     unsafe_allow_html=True)
         utd = agg.sort_values("util")
         util_cats = list(utd["sido_name"])
         fig_u = go.Figure(go.Bar(x=utd["util"], y=utd["sido_name"], orientation="h",
             marker=dict(color=list(utd["util"]), colorscale=scale, showscale=False),
             text=[f"{v:.1f}%" for v in utd["util"]],
-            textposition="outside", textfont=dict(size=8),
+            textposition="outside", textfont=dict(size=8, weight="bold"),
             hovertemplate="%{y}: %{x:.1f}%<extra></extra>"))
         fig_u.update_layout(
             xaxis=dict(showgrid=False,zeroline=False,visible=False),
-            yaxis=dict(showgrid=False,zeroline=False,tickfont=dict(size=8)),
+            yaxis=dict(showgrid=False,zeroline=False,tickfont=dict(size=8, weight="bold")),
             **cb(showlegend=False,height=300,margin=dict(t=6,b=10,l=4,r=50)),
         )
         _chg, _lab = capture_click(st.plotly_chart(fig_u, use_container_width=True,
@@ -963,7 +968,7 @@ def render_tab(cfg: dict):
 
     # ── 🎬 움직이는 차트 (바 차트 레이스 · 격리·접이식) ──────────────────────
     st.markdown("<hr class='dv'>", unsafe_allow_html=True)
-    with st.expander(f"🎬 움직이는 차트 — 시도별 {metric_label} 레이스 (자동 재생·반복)",
+    with st.expander(f"🎬 움직이는 차트 — 시도별 {metric_label} 레이스",
                      expanded=True):
         n_steps = 22
         race_df = agg.sort_values(mcol, ascending=False)
