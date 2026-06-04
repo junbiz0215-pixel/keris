@@ -367,8 +367,10 @@ def race_figure(cats, vals, scale, fmt="{:,.0f}", unit="", n_steps=20, height=42
         return go.Bar(
             x=scaled, y=cats, orientation="h",
             marker=dict(color=scaled, colorscale=scale, cmin=0, cmax=vmax, showscale=False),
-            text=[fmt.format(v) + unit for v in scaled],
-            textposition="outside", textfont=dict(size=9, family="JetBrains Mono, monospace"),
+            text=["<b>" + fmt.format(v) + unit + "</b>" for v in scaled],
+            textposition="outside",
+            textfont=dict(size=12, family="JetBrains Mono, monospace", color="#111827"),
+            cliponaxis=False,
             hovertemplate="%{y}: %{text}<extra></extra>",
         )
     frames = []
@@ -380,9 +382,11 @@ def race_figure(cats, vals, scale, fmt="{:,.0f}", unit="", n_steps=20, height=42
     fig.update_layout(
         paper_bgcolor=PAGE_BG, plot_bgcolor=PAGE_BG, height=height,
         font=dict(family="system-ui,-apple-system,sans-serif", color=TXT, size=10),
-        margin=dict(t=44, b=20, l=4, r=60),
-        xaxis=dict(range=[0, vmax * 1.18], visible=False, fixedrange=True),
-        yaxis=dict(autorange="reversed", fixedrange=True, tickfont=dict(size=9)),
+        margin=dict(t=30, b=20, l=72, r=70),
+        xaxis=dict(range=[0, vmax * 1.20], visible=False, fixedrange=True),
+        yaxis=dict(autorange="reversed", fixedrange=True,
+                   tickfont=dict(size=12, color="#111827"), ticklabelposition="outside",
+                   automargin=True),
         showlegend=False,
         sliders=[dict(
             active=0, x=0.1, len=0.88, y=1.06, yanchor="bottom",
@@ -963,8 +967,9 @@ def render_tab(cfg: dict):
                      expanded=True):
         n_steps = 22
         race_df = agg.sort_values(mcol, ascending=False)
+        race_labels = race_df["sido_name"].map(lambda s: SIDO_SHORT.get(s, s))
         fig_race = race_figure(
-            race_df["sido_name"], race_df[mcol], scale,
+            race_labels, race_df[mcol], scale,
             fmt=("{:,.0f}" if mcol in ("child", "fac") else "{:.1f}"),
             unit=("%" if mcol == "util" else ""), n_steps=n_steps, height=440)
         if fig_race is not None:
